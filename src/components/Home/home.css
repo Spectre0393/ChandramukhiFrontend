@@ -1,0 +1,14 @@
+.home-content-headers{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid white;
+    margin-bottom: 10px;
+}
+
+.home-content-headers h1{
+    font-family: var(--headingsfonts);  
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+}

@@ -1,0 +1,308 @@
+.table-wrapper{
+  width: 100%;
+  height: 100%;
+}
+
+.table-content-header{
+  box-sizing: border-box;
+  border-radius: 5px;
+  height: 40px;
+
+  margin-bottom: 5px;
+  padding: 0 20px 10px;
+
+  background-color: black;
+}
+
+.top-margin-adjuster-sales-expenses{
+  margin-top: 20px;
+}
+
+.top-margin-adjuster-finance-creditors{
+  margin-top: 5px;
+}
+
+.arrow-head{
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  padding: 10px 0 0;
+}
+
+.table-paper-container-extended-height {
+  width: 1000px;
+  height: 550px;
+  background-color: var(--tablePaperColor) !important ;
+}
+
+.table-paper-container-shortened-height {
+  width: 1000px;
+  height: 275px;
+  background-color: var(--tablePaperColor) !important;
+}
+
+.table-header-row {
+  width: 1000px !important;
+}
+
+.header-cell-formatter {
+  font-size: 15px !important;
+  font-family: var(--headingsfonts) !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+
+  height: 40px !important;
+
+  padding: 0 !important;
+}
+
+.checkbox-header-wid-bg {
+  width: 30px;
+  background-color: rgb(33, 138, 92);
+}
+
+.long-header-wid-bg {
+  width: 320px;
+  background-color: #3c9eb7;
+}
+
+.medium-header-wid-bg {
+  width: 250px;
+  background-color: rgb(39, 146, 39);
+}
+
+.short-header-wid-bg {
+  width: 100px;
+  background-color: rgb(208, 208, 66);
+}
+
+.data-row-cell-formatter {
+  font-size: 14px !important;
+  font-family: var(--paragraphfonts) !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+
+  height: 35px !important;
+
+  padding: 0 !important;
+
+  background-color: white;
+  text-transform: capitalize;
+}
+
+.data-row-cell-long-wid {
+  width: 350px;
+}
+
+.data-row-cell-medium-wid {
+  width: 250px;
+}
+
+.data-row-cell-short-wid {
+  width: 100px;
+}
+
+.daily-summary-full-table-absolute-row {
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  position: absolute; 
+  left: 365px;     
+  bottom: 20px;     
+
+  width: 795px;
+  height: 60px;
+
+  background-color: rgb(0, 98, 36) !important;
+
+  border-radius: 5px;
+}
+
+.daily-summary-short-table-absolute-row {
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  position: absolute;
+  left: 365px;
+  bottom: 295px;
+
+  width: 795px;
+  height: 60px;
+
+  background-color: rgb(0, 98, 36) !important;
+
+  border-radius: 5px;
+}
+
+.home-sales-daily-summary-absolute-row {
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  position: absolute;
+  left: 355px;  
+  bottom: 20px;
+
+  width: 315px;
+  height: 60px;
+
+  background-color: rgb(0, 98, 36) !important;
+
+  border-radius: 5px;
+}
+
+.home-expenses-daily-summary-absolute-row {
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  position: absolute;
+  right: 260px;
+  bottom: 20px;
+
+  width: 315px;
+  height: 60px;
+
+  background-color: rgb(0, 98, 36) !important;
+
+  border-radius: 5px;
+}
+
+.daily-summary-table-cell {
+  font-size: 17px !important; 
+  font-family: var(--paragraphfonts) !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  text-transform: capitalize !important;  
+
+  color: white !important;
+
+  border-bottom: none !important;
+}
+
+.full-table-pagination {
+  width: 200px;
+  height: 60px;
+
+  color: white !important;
+  background-color: rgb(6, 123, 206) !important;
+
+  padding: 0 !important;
+
+  border-bottom: none !important;
+  border-radius: 5px !important;
+
+  position: absolute; 
+  right: 75px;
+  bottom: 20px;
+}
+
+.home-sales-table-pagination{
+  width: 180px;
+  height: 60px;
+
+  color: white !important;
+  background-color: rgb(6, 123, 206) !important;
+
+  padding: 0 !important;
+
+  border-bottom: none !important;
+  border-radius: 5px !important;
+
+  position: absolute;   
+  left: 675px;
+  bottom: 20px;
+  
+  cursor: pointer;
+}
+
+.home-expenses-table-pagination {
+  width: 180px;
+  height: 60px;
+
+  color: white !important;
+  background-color: rgb(6, 123, 206) !important;
+
+  padding: 0 !important;
+
+  border-bottom: none !important;
+  border-radius: 5px !important;
+
+  position: absolute;   
+  right: 75px;
+  bottom: 20px;
+
+  cursor: pointer;
+}
+
+.short-table-pagination {
+  width: 200px;
+  height: 60px;
+
+  color: white !important;
+  background-color: rgb(6, 123, 206) !important;
+
+  padding: 0 !important;
+
+  border-bottom: none !important;
+  border-radius: 5px !important;
+
+  position: absolute;
+  right: 75px;
+  bottom: 295px;
+}
+
+.table-body-main{
+  position:  relative !important;
+}
+
+.pagination-finance-info{
+    width: 170px;
+    background-color: rgb(6, 123, 206) !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+    border-radius: 5px !important;
+    
+    position: absolute;
+    right: 70px;
+    bottom: 290px;
+    
+    color: white !important;
+    cursor: pointer;
+}
+
+/* home finance table css */
+
+.home-paper-container-extended-height {
+  width: 500px;
+  height: 600px;  
+  background-color: var(--tablePaperColor) !important;
+}
+
+.home-table-header-row {
+  width: 500px !important;
+}
+
+.home-long-header-wid-bg {
+  width: 260px; 
+  background-color: #3c9eb7;
+}
+
+.home-short-header-wid-bg {
+  width: 80px;
+  background-color: rgb(208, 208, 66);
+}
+
+.home-data-row-cell-long-wid {
+  width: 260px;
+}
+
+.home-data-row-cell-short-wid {
+  width: 80px;
+}

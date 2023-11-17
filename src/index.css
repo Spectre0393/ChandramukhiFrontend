@@ -1,13 +1,124 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=Quicksand:wght@300;400;500;600&display=swap');
+
+*{
+    padding: 0;
+    margin: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+:root{
+    --headingsfonts: 'Noto Serif', serif;
+    --paragraphfonts: 'Quicksand', sans-serif;
+
+    --submitBtnColor: rgb(46, 79, 24);
+    --updateBtnColor: rgb(52, 94, 136);
+    --deleteBtnColor: rgb(255, 0, 0);
+    --cancelBtnColor: rgb(255, 0, 0);
+    --continueBtnColor: rgb(16, 86, 16);
+    --okBtnColor: rgb(52, 94, 136);
+
+    --tablePaperColor: rgb(185, 185, 185);
+    --alertBackgroundColor: rgb(47, 75, 74);
+}
+
+body, html{
+    box-sizing: border-box;
+    background-color: rgb(112, 117, 86);
+}
+
+.wrapper{
+    box-sizing: border-box;
+    background-color: rgb(86, 117, 107);
+    margin: 0 auto;
+    width: 1400px;
+    height: 98vh;
+    border-radius: 10px;
+}
+
+.wrapper-second {
+    box-sizing: border-box;
+
+    margin: 0 auto;
+}
+
+.row-flex{
+    display: flex;
+}
+
+.col-flex{
+    display: flex;
+    flex-direction: column;
+}
+
+.row-flex-spaced-center{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.col-flex-spaced-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.col-gap-ten{
+    column-gap: 10px;
+}
+
+.row-gap-ten {
+    row-gap: 10px;  
+}
+
+.width-hundred{
+    width: 100%;
+}
+
+.general-button{
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    height: 40px;
+    padding: 0 10px;
+    
+    color: white;
+
+    font-family: var(--headingsfonts);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.submit-data-button{
+    width: 150px;
+    background-color: var(--submitBtnColor);
+}
+
+.update-button {
+    background-color: var(--updateBtnColor);
+}
+
+.delete-button {
+    background-color: var(--deleteBtnColor);
+}
+
+.ok-button {
+    background-color: var(--okBtnColor);
+}
+
+.cancel-button{
+    background-color: var(--cancelBtnColor);
+}
+
+.continue-button{
+    background-color: var(--continueBtnColor);
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.not-selectable {
+    user-select: none;
 }

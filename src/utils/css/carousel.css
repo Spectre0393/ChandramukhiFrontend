@@ -1,0 +1,16 @@
+.carousel-content {
+    margin-top: 70px;
+}
+
+.carousel-header {
+    box-sizing: border-box;
+    background-color: black;
+    padding: 10px 20px 0;
+
+    border-radius: 5px;
+}
+
+.carousel-display{
+    background-color: white;
+    border-radius: 5px;
+}
