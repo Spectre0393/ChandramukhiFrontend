@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import "./dailyexpenses.css";
 import "../../utils/css/dailySalsesExpenses.css";
-import axios from "axios";
+import { recordExpense } from "../../utils/APIS/ExpensesAPIS";
 
 const DailyExpensesRecorder = () => {
   const today = new Date();
 
   const [expensesData, setExpensesData] = useState({
-    expense: "",
+    expenseDetail: "",
     price: "",
     quantity: "",
-    expender: "",
-    date: today,
+    expenderName: "",
+    transactionDate: today,
   });
 
   const form = document.getElementById("expense_form");
@@ -23,16 +23,18 @@ const DailyExpensesRecorder = () => {
     });
   };
 
-  async function submitExpensesData(event) {
+  function submitExpensesData(event) {
     event.preventDefault();
-    await axios
-      .post("http://localhost:8081/record-expenses", expensesData)
-      .then((res) => {
-        window.location.reload(false);
+    recordExpense(expensesData)
+      ?.then(() => {
+        console.log(expensesData);
+        // window.location.reload(false);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((error) => {
+        alert("user creation failed");
+        console.log("error while saving data", error);
       });
+
     form.reset();
   }
   return (
@@ -42,7 +44,7 @@ const DailyExpensesRecorder = () => {
       className="row-flex-spaced-center width-hundred daily-form col-gap-ten"
     >
       <input
-        name="expense"
+        name="expenseDetail"
         type="text"
         placeholder="enter the expense detail here..."
         onChange={handleInput}
@@ -60,7 +62,7 @@ const DailyExpensesRecorder = () => {
         onChange={handleInput}
       ></input>
       <input
-        name="expender"
+        name="expenderName"
         type="text"
         placeholder="expender name"
         onChange={handleInput}

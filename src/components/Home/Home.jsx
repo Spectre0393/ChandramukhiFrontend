@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./home.css";
 import "../../utils/css/table.css";
-import formattedStringDate from "../../utils/DateFormatter";
+import { fetchTodayExpenses } from "../../utils/APIS/ExpensesAPIS";
+import { fetchTodaySales } from "../../utils/APIS/SalesAPIS";
 
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -11,15 +12,12 @@ import TableRow from "@material-ui/core/TableRow";
 import TablePagination from "@mui/material/TablePagination";
 import Paper from "@material-ui/core/Paper";
 
-import axios from "axios";
-
 let totalSales;
 let totalExpenses;
 let totalSalesQuantity;
 let totalExpensesQuantity;
 
 const Home = () => {
-  const today = new Date();
 
   //states definations for data fetching start
   const [salesRows, setSalesRows] = useState([]);
@@ -55,65 +53,44 @@ const Home = () => {
 
   useEffect(() => {
     const allSales = async () => {
-      try {
-        const response = await axios.get("http://localhost:8081/all-sales");
-        setSalesRows(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+    fetchTodaySales()?.then((response) => {
+      setSalesRows(response?.data);
+      setLoading(true);
+    });
     };
     const allExpenses = async () => {
-      try {
-        const response = await axios.get("http://localhost:8081/all-expenses");
-        setExpensesRows(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+    fetchTodayExpenses()?.then((response) => {
+      setExpensesRows(response?.data);
+      setLoading(true);
+    });
     };
     allSales();
     allExpenses();
   }, []);
   //api call to fetch all sales data end
 
-  //filter all sales for today's total sales start
-  const todayTotalSalesRows = salesRows?.filter((row) => {
-    if (formattedStringDate(row.sales_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter all sales for today's total sales end
-
-  //filter all expenses for today's total expenses start
-  const todayTotalExpensesRows = expensesRows?.filter((row) => {
-    if (formattedStringDate(row.expenses_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter all expenses for today's total expenses end
 
   // daily total counter start
   totalSales = 0;
-  todayTotalSalesRows?.map((row) => {
-    totalSales = totalSales + row.total;
+  salesRows?.map((row) => {
+    totalSales = totalSales + row.price * row.quantity;
     return totalSales;
   });
 
   totalSalesQuantity = 0;
-  todayTotalSalesRows?.map((row) => {
+  salesRows?.map((row) => {
     totalSalesQuantity = totalSalesQuantity + row.quantity;
     return totalSalesQuantity;
   });
 
   totalExpenses = 0;
-  todayTotalExpensesRows?.map((row) => {
-    totalExpenses = totalExpenses + row.total;
+  expensesRows?.map((row) => {
+    totalExpenses = totalExpenses + row.price * row.quantity;
     return totalExpenses;
   });
 
   totalExpensesQuantity = 0;
-  todayTotalExpensesRows?.map((row) => {
+  expensesRows?.map((row) => {
     totalExpensesQuantity = totalExpensesQuantity + row.quantity;
     return totalExpensesQuantity;
   });
@@ -148,16 +125,16 @@ const Home = () => {
                 </TableHead>
                 <TableBody>
                   {loading &&
-                    todayTotalSalesRows
+                    salesRows
                       .slice(
                         salesPage * salesRowsPerPage,
                         salesPage * salesRowsPerPage + salesRowsPerPage
                       )
                       .map((row) => {
                         return (
-                          <TableRow className="pointer" key={row.id}>
+                          <TableRow className="pointer" key={row.salesID}>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-long-wid">
-                              {row.product_name}
+                              {row.productName}
                             </TableCell>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-short-wid">
                               {row.price}
@@ -166,7 +143,7 @@ const Home = () => {
                               {row.quantity}
                             </TableCell>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-short-wid">
-                              {row.total}
+                              {row.price * row.quantity}
                             </TableCell>
                           </TableRow>
                         );
@@ -185,7 +162,7 @@ const Home = () => {
                 className="home-sales-table-pagination"
                 component="div"
                 rowsPerPageOptions={[13]}
-                count={todayTotalSalesRows.length}
+                count={salesRows.length}
                 rowsPerPage={salesRowsPerPage}
                 page={salesPage}
                 onPageChange={handleSalesChangePage}
@@ -214,16 +191,16 @@ const Home = () => {
                 </TableHead>
                 <TableBody>
                   {loading &&
-                    todayTotalExpensesRows
+                    expensesRows
                       .slice(
                         expensespage * expensesRowsPerPage,
                         expensespage * expensesRowsPerPage + expensesRowsPerPage
                       )
                       .map((row) => {
                         return (
-                          <TableRow className="pointer" key={row.expenses_id}>
+                          <TableRow className="pointer" key={row.expensesID}>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-long-wid">
-                              {row.expense_name}
+                              {row.expenseDetail}
                             </TableCell>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-short-wid">
                               {row.price}
@@ -232,7 +209,7 @@ const Home = () => {
                               {row.quantity}
                             </TableCell>
                             <TableCell className="data-row-cell-formatter home-data-row-cell-short-wid">
-                              {row.total}
+                              {row.price * row.quantity}
                             </TableCell>
                           </TableRow>
                         );
@@ -251,7 +228,7 @@ const Home = () => {
                 className="home-expenses-table-pagination"
                 component="div"
                 rowsPerPageOptions={[13]}
-                count={todayTotalExpensesRows.length}
+                count={expensesRows.length}
                 rowsPerPage={expensesRowsPerPage}
                 page={expensespage}
                 onPageChange={handleExpensesChangePage}

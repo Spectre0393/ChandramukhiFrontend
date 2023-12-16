@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "../../utils/css/table.css";
 import "../../utils/css/daily.css";
 
 import UpdateDeleteExpenses from "../../utils/UpdateDeleteButton/UpdateDeleteExpenses";
-import formattedStringDate from "../../utils/DateFormatter";
+import { fetchTodayExpenses } from "../../utils/APIS/ExpensesAPIS";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -47,44 +46,37 @@ const ExpensesTable = () => {
   };
   //states defination and functions for table pagination end
 
-  //api call to fetch all sales data start
-  useEffect(() => {
-    const allExpenses = async () => {
-      try {
-        const response = await axios.get("http://localhost:8081/all-expenses");
-        setExpensesRows(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    allExpenses();
-  }, []);
-  //api call to fetch all sales data end
+  // this is not used, but if we ever need all sales data, this will do
+  /*     useEffect(() => {
+    fetchAllExpenses()?.then((response) => {
+      setExpensesRows(response?.data);
+      setLoading(true);
+    });
+  }, []); */
 
-  //filter all expenses for today's total expenses start
-  const todayTotalExpensesRows = expensesRows?.filter((row) => {
-    if (formattedStringDate(row.expenses_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter all expenses for today's total expenses end
+  //api call to fetch all today expenses data start
+  useEffect(() => {
+    fetchTodayExpenses()?.then((response) => {
+      setExpensesRows(response?.data);
+      setLoading(true);
+    });
+  }, []);
+  //api call to fetch all today expenses data end
 
   // daily total counter start
   totalExpenses = 0;
-  todayTotalExpensesRows?.map((row) => {
-    totalExpenses = totalExpenses + row.total;
+  expensesRows?.map((row) => {
+    totalExpenses = totalExpenses + row.price * row.quantity;
     return totalExpenses;
   });
 
   totalQuantity = 0;
-  todayTotalExpensesRows?.map((row) => {
+  expensesRows?.map((row) => {
     totalQuantity = totalQuantity + row.quantity;
     return totalQuantity;
   });
   // daily total counter end
 
-  // states defination and functions for row selection in table start
   const [rowIdToSend, setRowIdToSend] = useState();
 
   const handleSingleRowSelection = (event, id) => {
@@ -95,15 +87,6 @@ const ExpensesTable = () => {
       setRowIdToSend();
     }
   };
-
-  /*   const handleSelectAllRows = (event) => {
-    if (event.target.checked) {
-      setRowIdToSend(todayTotalSalesRows?.map((row) => row.id));
-      return;
-    }
-    setRowIdToSend([]);
-  }; */
-  // states defination and functions for row selection in table end
 
   return (
     <div className="table-wrapper wrapper-second col-flex">
@@ -146,20 +129,20 @@ const ExpensesTable = () => {
           </TableHead>
           <TableBody>
             {loading &&
-              todayTotalExpensesRows
+              expensesRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   return (
-                    <TableRow className="pointer" key={row.expenses_id}>
+                    <TableRow className="pointer" key={row.expensesID}>
                       <TableCell className="data-row-cell-formatter checkbox-row">
                         <Checkbox
                           onChange={(event) =>
-                            handleSingleRowSelection(event, row.expenses_id)
+                            handleSingleRowSelection(event, row.expensesID)
                           }
                         />
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-long-wid">
-                        {row.expense_name}
+                        {row.expenseDetail}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
                         {row.price}
@@ -168,10 +151,10 @@ const ExpensesTable = () => {
                         {row.quantity}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                        {row.total}
+                        {row.price * row.quantity}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                        {row.expender}
+                        {row.expenderName}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-medium-wid">
                         <UpdateDeleteExpenses
@@ -186,7 +169,7 @@ const ExpensesTable = () => {
                 <p>Total Items Sold: {totalQuantity} Pcs.</p>
               </TableCell>
               <TableCell className="daily-summary-table-cell">
-                <p>Total Sales: Rs. {totalExpenses}</p>
+                <p>Total Expenses: Rs. {totalExpenses}</p>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -195,7 +178,7 @@ const ExpensesTable = () => {
           className="full-table-pagination"
           component="div"
           rowsPerPageOptions={[13]}
-          count={todayTotalExpensesRows.length}
+          count={expensesRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

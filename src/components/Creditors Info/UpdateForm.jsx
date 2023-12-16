@@ -1,13 +1,15 @@
 import React, { useState } from "react";  
 import '../../utils/css/daily.css'
-import axios from "axios";
+import { updatereditorTransactions } from "../../utils/APIS/CreditorTransactionsAPIS";
+
+const today = new Date();
 
 const CreditorTransactionUpdateForm = ({ rowToUpdate }) => {
   const [updateData, setUpdateData] = useState({
-    creditor: "",
-    amount: "",
-    transactionType: "",
-    depositor: "",
+    creditorName: "",
+    depositedAmount: "",
+    depositorName: "",
+    transactionDate: today,
   });
 
   const form = document.getElementById("creditors_transaction_update_form");
@@ -17,18 +19,12 @@ const CreditorTransactionUpdateForm = ({ rowToUpdate }) => {
   };
 
   const submitCreditorTransactionUpdate = async () => {
-    try {
-      await axios
-        .patch(
-          `http://localhost:8081/update-finance-transaction/${rowToUpdate.fetchedRow}`,
-          updateData
-        )
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While updating finance transaction record", err);
-    }
+    updatereditorTransactions(rowToUpdate.fetchedRow, updateData)
+    ?.then((response)=>{
+      window.location.reload(false);
+    }).catch((error)=>{
+      console.log("While updating creditor transaction record", error);
+    });
     form.reset();
   };
 
@@ -39,31 +35,19 @@ const CreditorTransactionUpdateForm = ({ rowToUpdate }) => {
         className="input-formatter row-flex-spaced-center col-gap-ten"
       >
         <input
-          name="creditor"
+          name="creditorName"
           type="text"
           placeholder="enter the creditor name here..."
           onChange={handleInput}
         ></input>
         <input
-          name="amount"
+          name="depositedAmount"
           type="text"
           placeholder="amount"
           onChange={handleInput}
         ></input>
-        <select
-          name="transactionType"
-          className="dropdown-option not-selectable"
-          required
-          onChange={handleInput}
-        >
-          <option value="" hidden>
-            Select your option
-          </option>
-          <option value="Deposit">Deposit</option>
-          <option value="Loan">Loan</option>
-        </select>
         <input
-          name="depositor"
+          name="depositorName"
           type="text"
           placeholder="depositor name"
           onChange={handleInput}

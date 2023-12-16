@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import "./adddeletefinance.css";
-import axios from "axios";
+
+import {
+  recordFinance,
+  fetchAllFinances,
+  deleteFinance
+} from "../../../utils/APIS/FinancesAPIS";
 
 const AddDeleteFinance = () => {
   let toggle;
@@ -13,8 +18,11 @@ const AddDeleteFinance = () => {
   const [loading, setLoading] = useState(false);
   const [newFinanceDetails, setNewFinanceDetails] = useState({
     financeName: "",
-    initialDeposit: "",
-    initialLoan: "",
+    membershipDate: "",
+    totalSavingAmount: "",
+    loanAmount: "",
+    loanStartDate: "",
+    loanEndDate: "",
   });
 
   const toggleAlertAdd = () => {
@@ -46,55 +54,46 @@ const AddDeleteFinance = () => {
       ...newFinanceDetails,
       [event.target.name]: event.target.value,
     });
-    console.log(newFinanceDetails);
   };
 
   const selectOption = (event) => {
     financeToDelete = event.target.value;
-    console.log(financeToDelete);
   };
 
-  // useEffect(() => {
-  const allFinances = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8081/all-finances-list"
-      );
-      console.log(response?.data.data);
-      setFinancesNameList(response?.data.data);
-      setLoading(true);
-    } catch (err) {
-      console.log(err);
-    }
+  const allFinances = () => {
+    fetchAllFinances()
+      ?.then((response) => {
+        setFinancesNameList(response?.data);
+        setLoading(true);
+      })
+      .catch((error) => {
+        console.log("error while fetching finance", error);
+      });
   };
-  /*     allFinances();
-  }, []); */
 
   const form = document.getElementById("finances_add_form");
 
-  const addFinance = async () => {
-    await axios
-      .post("http://localhost:8081/add-finance", newFinanceDetails)
-      .then((res) => {
+  const addFinance = () => {
+    recordFinance(newFinanceDetails)
+      ?.then(() => {
         window.location.reload(false);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((error) => {
+        console.log("error while saving finance", error);
       });
     form.reset();
   };
 
-    const deleteFinance = async () => {
-      try {
-        await axios
-          .delete(`http://localhost:8081/delete-finance/${financeToDelete}`)
-          .then((res) => {
-            window.location.reload(false);
-          });
-      } catch (err) {
-        console.log("While deleting finance", err);
-      }
-    };
+  const initiateDelete = async () => {
+    console.log("error while saving finance", financeToDelete);
+    deleteFinance(financeToDelete)
+      ?.then((res) => {
+        window.location.reload(false);
+      })
+      .catch((error) => {
+        console.log("error while saving finance", error);
+      });
+  };
 
   return (
     <div className="add-delete-finance-wrapper">
@@ -116,21 +115,40 @@ const AddDeleteFinance = () => {
         <div className="new-finance-form-wrapper">
           <h2>New Finance Details</h2>
           <form id="finances_add_form" className="new-finance-form">
-            <input
-              name="financeName"
-              placeholder="enter new finance name here..."
-              onChange={handleInput}
-            ></input>
-            <input
-              name="initialDeposit"
-              placeholder="enter initial deposit here..."
-              onChange={handleInput}
-            ></input>
-            <input
-              name="initialLoan"
-              placeholder="enter initial loan here..."
-              onChange={handleInput}
-            ></input>
+            <div className="form-inputGroup">
+              <input
+                name="financeName"
+                placeholder="enter new finance name here..."
+                onChange={handleInput}
+              ></input>
+              <input
+                name="membershipDate"
+                placeholder="membership date (YYYY-MM-DD...)"
+                onChange={handleInput}
+              ></input>
+              <input
+                name="totalSavingAmount"
+                placeholder="enter initial deposit here..."
+                onChange={handleInput}
+              ></input>
+            </div>
+            <div className="form-inputGroup">
+              <input
+                name="loanAmount"
+                placeholder="enter initial loan here..."
+                onChange={handleInput}
+              ></input>
+              <input
+                name="loanStartDate"
+                placeholder="loan start date (YYYY-MM-DD...)"
+                onChange={handleInput}
+              ></input>
+              <input
+                name="loanEndDate"
+                placeholder="loan end date (YYYY-MM-DD...)"
+                onChange={handleInput}
+              ></input>
+            </div>
           </form>
           <div className="alert-buttons">
             <button onClick={toggleShowNewFinanceForm}>Cancel</button>
@@ -166,11 +184,11 @@ const AddDeleteFinance = () => {
               {financesNameList.map((names) => {
                 return (
                   <option
-                    value={names.finance_name}
+                    value={names.financeID}
                     className="options-drop"
-                    key={names.finance_name}
+                    key={names.financeID}
                   >
-                    {names.finance_name}
+                    {names.financeName}
                   </option>
                 );
               })}
@@ -178,7 +196,7 @@ const AddDeleteFinance = () => {
           }
           <div className="alert-buttons">
             <button onClick={toggleShowDeleteFinanceForm}>Cancel</button>
-            <button onClick={deleteFinance}>Delete Finance</button>
+            <button onClick={initiateDelete}>Delete Finance</button>
           </div>
         </div>
       )}

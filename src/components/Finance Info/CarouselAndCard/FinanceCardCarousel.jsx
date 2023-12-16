@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../../utils/css/cardcarousel.css";
 
 import FinanceCard from "./FinanceCard";
-// import { financesData } from "../../../utils/data";
+import { fetchAllFinances } from "../../../utils/APIS/FinancesAPIS";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,62 +10,49 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-import axios from "axios";
-
 const FinanceCardCarousel = () => {
   const [allFinancesData, setAllFinancesData] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [currentIndexes, setCurrentIndexes] = useState([]);
+  
   //fetch all finances list start
   useEffect(() => {
-    const allFinances = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8081/all-finances-list"
-        );
-        setAllFinancesData(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+    const allFinances = () => {
+      fetchAllFinances()
+        ?.then((response) => {
+          setAllFinancesData(response?.data);
+          setLoading(true);
+          setCurrentIndexes(
+            Array.from(
+              { length: Math.min(4, response?.data?.length) },
+              (_, i) => i
+            )
+          );
+        })
+        .catch((error) => {
+          console.log("error while fetching finance", error);
+        });
     };
     allFinances();
   }, []);
   //fetch all finances list end
 
-  // card slider design start
-  const [currentIndexes, setCurrentIndexes] = useState([0, 1, 2, 3]);
-  const [displayFinanceData, setDisplayFinanceData] = useState(
-    currentIndexes.map((e) => allFinancesData[e])
-  );
+  // card slider design start  
+  let displayFinanceData = currentIndexes.map((e) => allFinancesData[e]);
+  const totalFinances = allFinancesData.length;
 
-  function nextCards() {
-    let indexes = [];
-    const totalFinances = allFinancesData.length;
-    currentIndexes.map((position, index) => {
-      if (position === totalFinances - 1) {
-        return indexes.push((position = 0));
-      } else {
-        return indexes.push(position + 1);
-      }
-    });
-    setCurrentIndexes(indexes);
-    setDisplayFinanceData(indexes.map((e) => allFinancesData[e]));
-    console.log();
-  }
+  const nextCards = () => {
+    setCurrentIndexes((prevIndexes) =>
+      prevIndexes.map((index) => (index + 1) % totalFinances)
+    );
+  };
 
-  function prevCards() {
-    let indexes = [];
-    const totalFinances = allFinancesData.length;
-    currentIndexes.map((position, index) => {
-      if (position === 0) {
-        return indexes.push((position = totalFinances - 1));
-      } else {
-        return indexes.push(position - 1);
-      }
-    });
-    setCurrentIndexes(indexes);
-    setDisplayFinanceData(indexes.map((e) => allFinancesData[e]));
-  }
+  const prevCards = () => {
+    setCurrentIndexes((prevIndexes) =>
+      prevIndexes.map((index) => (index - 1 + totalFinances) % totalFinances)
+    );
+  };
 
   // card slider design end
 

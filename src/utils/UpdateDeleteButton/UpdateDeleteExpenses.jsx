@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./updatedelete.css";
 
 import UpdateForm from "../../components/Daily Expenses/UpdateForm";
-import axios from "axios";
+import { deleteExpense } from "../APIS/ExpensesAPIS";
 
 const UpdateDeleteExpenses = ({ rowToModify }) => {
   const receivedRow = rowToModify.fetchedRow;
@@ -63,15 +63,13 @@ const UpdateDeleteExpenses = ({ rowToModify }) => {
   };
 
   const deleteRow = async () => {
-    try {
-      await axios
-        .delete(`http://localhost:8081/delete-expense/${rowToModify.fetchedRow}`)
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While deleting sales record", err);
-    }
+    deleteExpense(rowToModify.fetchedRow)
+      ?.then((res) => {
+        window.location.reload(false);
+      })
+      .catch((err) => {
+        console.log("While deleting sales record", err);
+      });
   };
 
   return (

@@ -21,10 +21,8 @@ import {
 import DailyCreditorRecorder from "./DailyCreditorRecorder";
 import AddDeleteCreditor from "./New Creditor/AddDeleteCreditor";
 import CreditorsCardCarousel from "./CarouselAndCard/CreditorsCardCarousel";
-import formattedStringDate from "../../utils/DateFormatter";
 import UpdateDeleteCreditorTransaction from "../../utils/UpdateDeleteButton/UpdateDeleteCreditorTransaction";
-
-import axios from "axios";
+import {fetchAllTodayCreditorsTransactions} from '../../utils/APIS/CreditorTransactionsAPIS'
 
 let totalLoanPaid;
 let todayCreditorsCount;
@@ -78,37 +76,27 @@ const CreditorsInfo = () => {
   // fetch all finance transactions start
   useEffect(() => {
     const allCreditorTransaction = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8081/all-creditors-transaction-list"
-        );
-        setCreditorTransactionsRows(response?.data.data);
+      fetchAllTodayCreditorsTransactions()
+      ?.then((response)=>{
+        setCreditorTransactionsRows(response?.data);
         setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+      }).catch((error)=>{
+        console.log(error);
+      })
     };
     allCreditorTransaction();
   }, []);
   // fetch all finance transactions end
 
-  //filter today's finance transaction rows start
-  const todayTotalTransaction = creditorTransacionsRows?.filter((row) => {
-    if (formattedStringDate(row.transaction_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter today's finance transaction rows end
-
   // daily total counter start
   totalLoanPaid = 0;
-  todayTotalTransaction?.map((row) => {
-    totalLoanPaid = totalLoanPaid + row.paid_amount;
+  creditorTransacionsRows?.map((row) => {
+    totalLoanPaid = totalLoanPaid + row.depositedAmount;
     return totalLoanPaid;
   });
 
   todayCreditorsCount = 0;
-  todayTotalTransaction?.map((row) => {
+  creditorTransacionsRows?.map((row) => {
     todayCreditorsCount = todayCreditorsCount + 1;
     return todayCreditorsCount;
   });
@@ -140,10 +128,7 @@ const CreditorsInfo = () => {
                   Creditor's Name
                 </TableCell>
                 <TableCell className="header-cell-formatter short-header-wid-bg">
-                  Amount
-                </TableCell>
-                <TableCell className="header-cell-formatter short-header-wid-bg">
-                  Transaction Type
+                  Deposited Amount
                 </TableCell>
                 <TableCell className="header-cell-formatter short-header-wid-bg">
                   Paid By
@@ -155,37 +140,34 @@ const CreditorsInfo = () => {
             </TableHead>
             <TableBody>
               {loading &&
-                todayTotalTransaction
+                creditorTransacionsRows
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                     return (
                       <TableRow
                         className="pointer"
-                        key={row.creditors_transaction_id}
+                        key={row.creditorTransactionsID}
                       >
                         <TableCell className="data-row-cell-formatter checkbox-row">
                           <Checkbox
                             onChange={(event) =>
                               handleSingleRowSelection(
                                 event,
-                                row.creditors_transaction_id,
-                                row.creditor_name,
-                                row.paid_amount
+                                row.creditorTransactionsID,
+                                row.creditorName,
+                                row.depositedAmount
                               )
                             }
                           />
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-long-wid">
-                          {row.creditor_name}
+                          {row.creditorName}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.paid_amount}
+                          {row.depositedAmount}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.transaction_type}
-                        </TableCell>
-                        <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.deposited_by}
+                          {row.depositorName}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-medium-wid">
                           <UpdateDeleteCreditorTransaction

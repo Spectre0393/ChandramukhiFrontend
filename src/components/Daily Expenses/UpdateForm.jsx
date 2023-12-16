@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import "./dailyexpenses.css";
-import axios from "axios";
+import { updateExpense } from "../../utils/APIS/ExpensesAPIS";
 
 const UpdateForm = ({ rowToUpdate }) => {
   const [updateData, setUpdateData] = useState({
-    expense: "",
+    expenseDetail: "",
     price: "",
     quantity: "",
-    expender: "",
+    expenderName: "",
   });
 
   const form = document.getElementById("expenses_update_form");
@@ -17,7 +17,15 @@ const UpdateForm = ({ rowToUpdate }) => {
   };
 
   const submitExpensesUpdate = async () => {
-    try {
+        updateExpense(rowToUpdate.fetchedRow, updateData)
+          .then((res) => {
+            window.location.reload(false);
+          })
+          .catch((err) => {
+            console.log("While updating sales record", err);
+          });
+        form.reset();
+/*     try {
       await axios
         .patch(
           `http://localhost:8081/update-expense/${rowToUpdate.fetchedRow}`,
@@ -29,14 +37,17 @@ const UpdateForm = ({ rowToUpdate }) => {
     } catch (err) {
       console.log("While updating expenses record", err);
     }
-    form.reset();
+    form.reset(); */
   };
 
   return (
     <div className="data-update-form col-flex-spaced-center row-gap-ten">
-      <form id="expenses_update_form" className="row-flex-spaced-center col-gap-ten">
+      <form
+        id="expenses_update_form"
+        className="row-flex-spaced-center col-gap-ten"
+      >
         <input
-          name="product"
+          name="expenseDetail"
           type="text"
           placeholder="enter the expense detail here..."
           onChange={handleInput}
@@ -54,7 +65,7 @@ const UpdateForm = ({ rowToUpdate }) => {
           onChange={handleInput}
         ></input>
         <input
-          name="seller"
+          name="expenderName"
           type="text"
           placeholder="expender name"
           onChange={handleInput}

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import axios from "axios";
+
+import { updateSale } from "../../utils/APIS/SalesAPIS";
 
 const UpdateForm = ({ rowToUpdate }) => {
   const [updateData, setUpdateData] = useState({
-    product: "",
+    productName: "",
     price: "",
     quantity: "",
-    seller: "",
+    sellerName: "",
   });
 
   const form = document.getElementById("update_form");
@@ -16,7 +17,16 @@ const UpdateForm = ({ rowToUpdate }) => {
   };
 
   const submitSalesUpdate = async () => {
-    try {
+    updateSale(rowToUpdate.fetchedRow, updateData)
+      .then((res) => {
+        window.location.reload(false);
+      })
+      .catch((err) => {
+        console.log("While updating sales record", err);
+      });
+    form.reset();
+
+    /*     try {
       await axios
         .patch(
           `http://localhost:8081/update-sale/${rowToUpdate.fetchedRow}`,
@@ -28,14 +38,14 @@ const UpdateForm = ({ rowToUpdate }) => {
     } catch (err) {
       console.log("While updating sales record", err);
     }
-    form.reset();
+    form.reset(); */
   };
 
   return (
     <div className="data-update-form col-flex-spaced-center row-gap-ten">
       <form id="update_form" className="row-flex-spaced-center col-gap-ten">
         <input
-          name="product"
+          name="productName"
           type="text"
           placeholder="enter the product name here..."
           onChange={handleInput}
@@ -53,7 +63,7 @@ const UpdateForm = ({ rowToUpdate }) => {
           onChange={handleInput}
         ></input>
         <input
-          name="seller"
+          name="sellerName"
           type="text"
           placeholder="seller name"
           onChange={handleInput}

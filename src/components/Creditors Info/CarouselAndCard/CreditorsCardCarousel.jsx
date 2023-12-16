@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../../utils/css/cardcarousel.css";
 
 import CreditorsCard from "./CreditorsCard";
-// import { creditorsData } from "../../../utils/data";
+import { fetchAllCreditors } from "../../../utils/APIS/CreditorsAPIS";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,60 +10,74 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-import axios from "axios";
-
 const CreditorsCardCarousel = () => {
-  const [allCreditorsData, setAllCreditorsData] = useState([]);
   const [loading, setLoading] = useState(false);
-  //fetch all creditors list start
+  const [allCreditorsData, setAllCreditorsData] = useState([]);
+  const [currentIndexes, setCurrentIndexes] = useState([]);
+
   useEffect(() => {
-    const allCreditors = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8081/all-creditors-list"
-        );
-        setAllCreditorsData(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+    const allCreditors = () => {
+      fetchAllCreditors()
+        ?.then((response) => {
+          setAllCreditorsData(response?.data);
+          setLoading(true);
+          setCurrentIndexes(
+            Array.from(
+              { length: Math.min(4, response?.data?.length) },
+              (_, i) => i
+            )
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     allCreditors();
   }, []);
-  //fetch all creditors list end
 
+  // card slider design start
+  let displayCreditorsData = currentIndexes.map((e) => allCreditorsData[e]);
+  const totalCreditors = allCreditorsData.length;
 
-  const [currentIndexes, setCurrentIndexes] = useState([0, 1, 2, 3]);
-  const [displayCreditorsData, setDisplayCreditorsData] = useState(
-    currentIndexes.map((e) => allCreditorsData[e])
-  );
+  const nextCards = () => {
+    setCurrentIndexes((prevIndexes) =>
+      prevIndexes.map((index) => (index + 1) % totalCreditors)
+    );
+  };
 
-  function nextCards() {
-    let indexes = [];
-    currentIndexes.map((position, index) => {
-      if (position === 7) {
-        return indexes.push((position = 0));
-      } else {
-        return indexes.push(position + 1);
-      }
-    });
-    console.log(indexes);
+  const prevCards = () => {
+    setCurrentIndexes((prevIndexes) =>
+      prevIndexes.map((index) => (index - 1 + totalCreditors) % totalCreditors)
+    );
+  };
+  // card slider design end
+
+  // my code for card rotation
+  /*     function nextCards() {
+      let indexes = [];
+      currentIndexes.map((position, index) => {
+        if (position === totalCreditors - 1) {
+          return indexes.push((position = 0));
+        } else {
+          return indexes.push(position + 1);
+        }
+      });
+      setCurrentIndexes(indexes);
+      displayCreditorsData = currentIndexes.map((e) => allCreditorsData[e]);
+    }
+
+    function prevCards() {
+      let indexes = [];
+      currentIndexes.map((position, index) => {
+        if (position === 0) {
+          return indexes.push((position = totalCreditors - 1));
+        } else {
+          return indexes.push(position - 1);
+        }
+      });
     setCurrentIndexes(indexes);
-    setDisplayCreditorsData(indexes.map((e) => allCreditorsData[e]));
-  }
-
-  function prevCards() {
-    let indexes = [];
-    currentIndexes.map((position, index) => {
-      if (position === 0) {
-        return indexes.push((position = 7));
-      } else {
-        return indexes.push(position - 1);
-      }
-    });
-    setCurrentIndexes(indexes);
-    setDisplayCreditorsData(indexes.map((e) => allCreditorsData[e]));
-  }
+    displayCreditorsData = currentIndexes.map((e) => allCreditorsData[e]);
+    } */
 
   return (
     <div className="carousel-container">

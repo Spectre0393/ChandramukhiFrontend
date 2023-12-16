@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";
+import {
+  fetchFinanceByName,
+} from "../../utils/APIS/FinancesAPIS";
+import { recordFinanceTransactions } from "../../utils/APIS/FinanceTransactionsAPIS";
 
 const DailyFinanceRecorder = () => {
   const today = new Date();
 
   const [newFinanceTransaction, setNewFinanceTransaction] = useState({
-    finance: "",
-    amount: "",
-    transactionType: "",
-    depositor: "",
-    date: today,
+    financeName: "",
+    depositedAmount: "",
+    depositorName: "",
+    transactionDate: today,
   });
 
   const form = document.getElementById("finance_entry_form");
@@ -24,7 +26,6 @@ const DailyFinanceRecorder = () => {
   //to update the daily finance transaction in finances table start
 
   const [financeIsThere, setFinanceIsThere] = useState(false);
-
   const hideFinanceDoesntExist = () => {
     setFinanceIsThere(false);
   };
@@ -32,61 +33,24 @@ const DailyFinanceRecorder = () => {
   async function submitFinanceTransactionData(event) {
     event.preventDefault();
     let fetchedRow;
-    const selectedFinance = newFinanceTransaction.finance;
+    const selectedFinance = newFinanceTransaction.financeName;
+    console.log("finance name", selectedFinance);
 
-    await axios
-      .get(`http://localhost:8081/selected-finance/${selectedFinance}`)
-      .then((res) => {
-        fetchedRow = res;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    if (fetchedRow?.data?.data[0]?.finance_name === undefined) {
-      let financeDoesntExist = !financeIsThere;
-      console.log(financeDoesntExist);
-      setFinanceIsThere(financeDoesntExist);
+    fetchFinanceByName(selectedFinance).then((response) => {
+      fetchedRow = response?.data;
+      console.log("fetchedRow:", fetchedRow);
+      if (fetchedRow?.financeName === undefined) {
+        let financeDoesntExist = !financeIsThere;
+        console.log("finance status:", financeDoesntExist);
+        setFinanceIsThere(financeDoesntExist);
+        form.reset();
+      } else if (fetchedRow?.financeName !== "") {
+        console.log("to save transaction:", newFinanceTransaction);
+        recordFinanceTransactions(newFinanceTransaction);
+      }
       form.reset();
-    } else if (fetchedRow?.data?.data[0]?.finance_name !== "") {
-      const financeName = fetchedRow?.data?.data[0]?.finance_name;
-      const financeAmount =
-        parseInt(fetchedRow?.data?.data[0]?.deposit) +
-        parseInt(newFinanceTransaction.amount);
-        
-      const toUpdateValues = {
-        toUpdateAmount: financeAmount,
-        toUpdateFinance: financeName,
-      };
-      //record transaction in transaction table if finance exist in finance table
-      await axios
-        .post(
-          "http://localhost:8081/record-financeTransaction",
-          newFinanceTransaction
-        )
-        .then((res) => {
-          window.location.reload(false);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      form.reset();
-      console.log("value is updated");
-
-      //update balance in finance table as per transaction
-
-      await axios
-        .patch(
-          `http://localhost:8081/update-finance-balance/${financeName}`,
-          toUpdateValues
-        )
-        .then((res) => {
-          // window.location.reload(false);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+      window.location.reload(false);
+    });
   }
 
   return (
@@ -97,35 +61,21 @@ const DailyFinanceRecorder = () => {
         onSubmit={submitFinanceTransactionData}
       >
         <input
-          name="finance"
+          name="financeName"
           type="text"
           placeholder="finance name..."
           className="not-selectable"
           onChange={handleInput}
         ></input>
         <input
-          name="amount"
+          name="depositedAmount"
           type="text"
           placeholder="amount..."
           className="not-selectable"
           onChange={handleInput}
         ></input>
-
-        <select
-          name="transactionType"
-          className="dropdown-option not-selectable"
-          required
-          onChange={handleInput}
-        >
-          <option value="" hidden>
-            Select your option
-          </option>
-          <option value="Deposit">Deposit</option>
-          <option value="Loan">Loan</option>
-        </select>
-
         <input
-          name="depositor"
+          name="depositorName"
           type="text"
           placeholder="deposited by..."
           className="not-selectable"

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import "./updatedelete.css";
 import UpdateForm from "../../components/Finance Info/UpdateForm";
-import axios from "axios";
+import { deleteFinanceTransactions } from "../APIS/FinanceTransactionsAPIS";
+
 
 const UpdateDeleteFinanceTransaction = ({ rowToModify }) => {
+
   const receivedRowId = rowToModify.fetchedId;
-  const receivedRowName = rowToModify.fetchedName;
-  const receivedRowAmount = rowToModify.fetchedAmount;
 
   //state and toggle function to delete and update alert start
   const [selectValueAlert, setSelectValueAlert] = useState(false);
@@ -61,52 +61,13 @@ const UpdateDeleteFinanceTransaction = ({ rowToModify }) => {
   };
 
   const deleteRow = async () => {
-    let depositBalance;
-
-    await axios
-      .get(`http://localhost:8081/selected-finance/${rowToModify.fetchedName}`)
+    deleteFinanceTransactions(rowToModify.fetchedId)
       .then((res) => {
-        depositBalance = res?.data?.data[0].deposit;
-        console.log(depositBalance);
+        window.location.reload(false);
       })
       .catch((err) => {
         console.log(err);
       });
-
-    const newDeposit = depositBalance - receivedRowAmount;
-
-        if (
-          receivedRowId !== "" ||
-          receivedRowName !== "" ||
-          receivedRowAmount !== ""
-        ) {
-          const newData = {
-            financeName: rowToModify.fetchedName,
-            newDepositBalance: newDeposit,
-          };
-          await axios
-            .patch(
-              `http://localhost:8081/update-transaction-deletion-finance-balance/${rowToModify.receivedRowName}`,
-              newData
-            )
-            .then((res) => {
-              console.log("res");
-            });
-        }
-        console.log("initiating deletion");
-        console.log(rowToModify.fetchedId); 
-
-    try {
-      await axios
-        .delete(
-          `http://localhost:8081/delete-finance-transaction/${rowToModify.fetchedId}`
-        )
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While deleting sales record", err);
-    }
   };
 
   return (

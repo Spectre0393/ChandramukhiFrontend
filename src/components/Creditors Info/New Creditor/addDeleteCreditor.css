@@ -97,6 +97,11 @@
     margin: 10px 0 20px;
 }
 
+.inputGroup{
+    display: flex;
+    column-gap: 20px;
+}
+
 .new-finance-form input {
     height: 40px;
     border: none;

@@ -3,11 +3,11 @@ import "../../utils/css/daily.css";
 import "../../utils/css/table.css";
 import "../../utils/css/carousel.css";
 
+import { fetchAllTodayFinancesTransactions } from "../../utils/APIS/FinanceTransactionsAPIS";
 import FinanceCardCarousel from "./CarouselAndCard/FinanceCardCarousel";
 import DailyFinanceRecorder from "./DailyFinanceRecorder";
 import UpdateDeleteFinanceTransaction from "../../utils/UpdateDeleteButton/UpdateDeleteFinanceTransaction";
 import AddDeleteFinance from "./NewFinance/AddDeleteFinance";
-import formattedStringDate from "../../utils/DateFormatter";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -24,15 +24,13 @@ import Paper from "@material-ui/core/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import Checkbox from "@mui/material/Checkbox";
 
-import axios from "axios";
-
 let totalDepositMade;
-let totalLoanPaid;
 let todayFinanceCount;
 
 const FinancialInfo = () => {
   const today = new Date();
 
+  // holding only values to today transactions
   const [financeTransacionsRows, setFinanceTransactionsRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -68,6 +66,7 @@ const FinancialInfo = () => {
       setRowIdToSend(id);
       setRowFinanceToSend(rollBackName);
       setRowAmountToSend(rollBackAmount);
+      
     } else {
       setRowIdToSend();
       setRowFinanceToSend();
@@ -76,63 +75,31 @@ const FinancialInfo = () => {
   };
   // states defination and functions for row selection in table end
 
-  // fetch all finance transactions start
+  // fetch today finance transactions start
   useEffect(() => {
-    const allFinanceTransaction = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8081/all-finance-transactions"
-        );
-        setFinanceTransactionsRows(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
+    const allTodayFinanceTransaction = () => {
+      fetchAllTodayFinancesTransactions()
+        .then((response) => {
+          setFinanceTransactionsRows(response?.data);
+          setLoading(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     };
-
-    allFinanceTransaction();
+    allTodayFinanceTransaction();
   }, []);
   // fetch all finance transactions end
 
-  //filter today's finance transaction rows start
-  const todayTotalTransaction = financeTransacionsRows?.filter((row) => {
-    if (formattedStringDate(row.transaction_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter today's finance transaction rows end
-
-  //filter all transaction for today's deposit start
-  const todayTotalDepositsRows = todayTotalTransaction?.filter((row) => {
-    if (row.transaction_type === "Deposit") {
-      return row;
-    } else return null;
-  });
-  //filter all transaction for today's deposit end
-
-  //filter all transaction for today's loan start
-  const todayTotalLoansRows = todayTotalTransaction?.filter((row) => {
-    if (row.transaction_type === "Loan") {
-      return row;
-    } else return null;
-  });
-  //filter all transaction for today's deposit end
-
   // daily total counter start
   totalDepositMade = 0;
-  todayTotalDepositsRows?.map((row) => {
-    totalDepositMade = totalDepositMade + row.amount;
+  financeTransacionsRows?.map((row) => {
+    totalDepositMade = totalDepositMade + row.depositedAmount;
     return totalDepositMade;
   });
 
-  totalLoanPaid = 0;
-  todayTotalLoansRows?.map((row) => {
-    totalLoanPaid = totalLoanPaid + row.amount;
-    return totalLoanPaid;
-  });
-
   todayFinanceCount = 0;
-  todayTotalTransaction?.map((row) => {
+  financeTransacionsRows?.map((row) => {
     todayFinanceCount = todayFinanceCount + 1;
     return todayFinanceCount;
   });
@@ -167,9 +134,6 @@ const FinancialInfo = () => {
                   Amount
                 </TableCell>
                 <TableCell className="header-cell-formatter short-header-wid-bg">
-                  Transaction Type
-                </TableCell>
-                <TableCell className="header-cell-formatter short-header-wid-bg">
                   Deposited By
                 </TableCell>
                 <TableCell className="header-cell-formatter medium-header-wid-bg">
@@ -179,34 +143,34 @@ const FinancialInfo = () => {
             </TableHead>
             <TableBody>
               {loading &&
-                todayTotalTransaction
+                financeTransacionsRows
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                     return (
-                      <TableRow className="pointer" key={row.transaction_id}>
+                      <TableRow
+                        className="pointer"
+                        key={row.financeTransactionsID}
+                      >
                         <TableCell className="data-row-cell-formatter checkbox-row">
                           <Checkbox
                             onChange={(event) =>
                               handleSingleRowSelection(
                                 event,
-                                row.transaction_id,
-                                row.finance_name,
-                                row.amount
+                                row.financeTransactionsID,
+                                row.financeName,
+                                row.depositedAmount
                               )
                             }
                           />
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-long-wid">
-                          {row.finance_name}
+                          {row.financeName}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.amount}
+                          {row.depositedAmount}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.transaction_type}
-                        </TableCell>
-                        <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                          {row.deposited_by}
+                          {row.depositorName}
                         </TableCell>
                         <TableCell className="data-row-cell-formatter data-row-cell-medium-wid">
                           <UpdateDeleteFinanceTransaction
@@ -226,9 +190,6 @@ const FinancialInfo = () => {
                 </TableCell>
                 <TableCell className="daily-summary-table-cell">
                   <p>Total Deposit: Rs. {totalDepositMade}</p>
-                </TableCell>
-                <TableCell className="daily-summary-table-cell">
-                  <p>Total Loan Payment: Rs. {totalLoanPaid}</p>
                 </TableCell>
               </TableRow>
             </TableBody>

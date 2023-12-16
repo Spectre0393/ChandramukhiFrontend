@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import "./updatedelete.css";
 import UpdateForm from "../../components/Creditors Info/UpdateForm";
-import axios from "axios";
+import { deleteCreditorTransactions } from "../APIS/CreditorTransactionsAPIS";
+
 
 const UpdateDeleteCreditorTransaction = ({ rowToModify }) => {
   const receivedRowId = rowToModify.fetchedId;
-  const receivedRowName = rowToModify.fetchedName;
-  const receivedRowAmount = rowToModify.fetchedAmount;
 
   //state and toggle function to delete and update alert start
   const [selectValueAlert, setSelectValueAlert] = useState(false);
@@ -61,51 +60,13 @@ const UpdateDeleteCreditorTransaction = ({ rowToModify }) => {
   };
 
   const deleteRow = async () => {
-    let creditorDbBalance;
-
-    await axios
-      .get(`http://localhost:8081/selected-creditor/${rowToModify.fetchedName}`)
-      .then((res) => {
-        creditorDbBalance = res?.data?.data[0].debit_amount;
-        console.log(creditorDbBalance);
+    deleteCreditorTransactions(rowToModify.fetchedId)
+      ?.then((response) => {
+        window.location.reload(false);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((error) => {
+        console.log(error);
       });
-
-      const newDebitAmout = creditorDbBalance - receivedRowAmount;
-
-    if (
-      receivedRowId !== "" ||
-      receivedRowName !== "" ||
-      receivedRowAmount !== ""
-    ) {
-      const newData = {
-        creditorName: rowToModify.fetchedName,
-        newDebit: newDebitAmout,
-      };
-      await axios
-        .patch(
-          `http://localhost:8081/update-transaction-deletion-creditors-balance/${rowToModify.receivedRowName}`,
-          newData
-        )
-        .then((res) => {
-          console.log("res");
-        });
-    }
-    console.log('initiating deletion')
-    console.log(rowToModify.fetchedId); 
-    try {
-      await axios
-        .delete(
-          `http://localhost:8081/delete-creditors-transaction/${rowToModify.fetchedId}`
-        )
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While deleting sales record", err);
-    }
   };
 
   return (

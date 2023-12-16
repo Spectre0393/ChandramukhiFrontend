@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./addDeleteCreditor.css";
-import axios from "axios";
+
+import {recordCreditor, fetchAllCreditors, deleteCreditor} from '../../../utils/APIS/CreditorsAPIS'
 
 const AddDeleteCreditor = () => {
   let toggle;
@@ -13,8 +14,10 @@ const AddDeleteCreditor = () => {
   const [loading, setLoading] = useState(false);
   const [newCreditorDetails, setNewCreditorDetails] = useState({
     creditorName: "",
-    initialDeposit: "",
-    initialLoan: "",
+    totalLoanAmount: "",
+    totalPaidAmount: "",
+    loanStartDate: "",
+    loanEndDate: "",
   });
 
   const toggleAlertAdd = () => {
@@ -50,52 +53,42 @@ const AddDeleteCreditor = () => {
   };
 
   const selectOption = (event) => {
-    console.log('we in here')
     creditorToDelete = event.target.value;
-    console.log(creditorToDelete);
   };
 
   // useEffect(() => {
-  const allCreditors = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8081/all-creditors-list"
-      );
-      console.log(response?.data.data);
-      setCreditorsNameList(response?.data.data);
-      setLoading(true);
-    } catch (err) {
-      console.log(err);
-    }
+  const allCreditors = () => {
+    fetchAllCreditors()
+      ?.then((response) => {
+        setCreditorsNameList(response?.data);
+        setLoading(true);
+      })
+      .catch((error) => {
+        console.log("error while fetching creditors", error);
+      });
   };
-  /*     allFinances();
-  }, []); */
 
   const form = document.getElementById("finances_add_form");
 
-  const addCreditor = async () => {
-    await axios
-      .post("http://localhost:8081/add-creditor", newCreditorDetails)
-      .then((res) => {
-        window.location.reload(false);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    form.reset();
+  const addCreditor = () => {
+      recordCreditor(newCreditorDetails)
+        ?.then(() => {
+          window.location.reload(false);
+        })
+        .catch((error) => {
+          console.log("error while saving finance", error);
+        });
+      form.reset();
   };
 
-  const deleteCreditor = async () => {
-    console.log('trying deletion')
-    try {
-      await axios
-        .delete(`http://localhost:8081/delete-creditor/${creditorToDelete}`)
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While deleting creditor", err);
-    }
+  const initiateDeletion = () => {
+     deleteCreditor(creditorToDelete)
+       ?.then((res) => {
+         window.location.reload(false);
+       })
+       .catch((error) => {
+         console.log("error while deleting creditors", error);
+       });
   };
 
   return (
@@ -118,21 +111,30 @@ const AddDeleteCreditor = () => {
         <div className="new-finance-form-wrapper">
           <h2>New Creditor Details</h2>
           <form id="finances_add_form" className="new-finance-form">
-            <input
-              name="creditorName"
-              placeholder="enter new creditor name here..."
-              onChange={handleInput}
-            ></input>
-            <input
-              name="initialDeposit"
-              placeholder="enter initial deposit here..."
-              onChange={handleInput}
-            ></input>
-            <input
-              name="initialLoan"
-              placeholder="enter initial loan here..."
-              onChange={handleInput}
-            ></input>
+            <div className="inputGroup">
+              <input
+                name="creditorName"
+                placeholder="enter new creditor name here..."
+                onChange={handleInput}
+              ></input>
+              <input
+                name="totalLoanAmount"
+                placeholder="enter total loan here..."
+                onChange={handleInput}
+              ></input>
+            </div>
+            <div className="inputGroup">
+              <input
+                name="loanStartDate"
+                placeholder="enter loan start date here..."
+                onChange={handleInput}
+              ></input>
+              <input
+                name="loanEndDate"
+                placeholder="enter loan end date here..."
+                onChange={handleInput}
+              ></input>
+            </div>
           </form>
           <div className="alert-buttons">
             <button onClick={toggleShowNewCreditorForm}>Cancel</button>
@@ -168,11 +170,11 @@ const AddDeleteCreditor = () => {
               {creditorsNameList.map((names) => {
                 return (
                   <option
-                    value={names.creditors_name}
+                    value={names.creditorsID}
                     className="options-drop"
-                    key={names.creditors_name}
+                    key={names.creditorsID}
                   >
-                    {names.creditors_name}
+                    {names.creditorName}
                   </option>
                 );
               })}
@@ -180,7 +182,7 @@ const AddDeleteCreditor = () => {
           }
           <div className="alert-buttons">
             <button onClick={toggleShowDeleteCreditorForm}>Cancel</button>
-            <button onClick={deleteCreditor}>Delete Finance</button>
+            <button onClick={initiateDeletion}>Delete Finance</button>
           </div>
         </div>
       )}

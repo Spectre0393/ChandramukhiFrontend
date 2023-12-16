@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import "./dailysales.css";
 import "../../utils/css/dailySalsesExpenses.css";
-import axios from "axios";
+import { recordSale } from "../../utils/APIS/SalesAPIS";
 
 const DailySalesRecorder = () => {
   const today = new Date();
 
   const [salesData, setSalesData] = useState({
-    product: "",
+    productName: "",
     price: "",
     quantity: "",
-    seller: "",
-    date: today,
+    sellerName: "",
+    transactionDate: today,
   });
 
   const form = document.getElementById("sales_form");
@@ -20,18 +20,21 @@ const DailySalesRecorder = () => {
     setSalesData({ ...salesData, [event.target.name]: event.target.value });
   };
 
-  async function submitSalesData(event) {
+  function submitSalesData(event) {
     event.preventDefault();
-    await axios
-      .post("http://localhost:8081/record-sales", salesData)
-      .then((res) => {
-        window.location.reload(false);
+    recordSale(salesData)
+      ?.then(() => {
+        console.log(salesData);
+        // window.location.reload(false);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((error) => {
+        alert("user creation failed");
+        console.log("error while saving data", error);
       });
+
     form.reset();
   }
+
   return (
     <form
       id="sales_form"
@@ -39,7 +42,7 @@ const DailySalesRecorder = () => {
       className="row-flex-spaced-center width-hundred daily-form col-gap-ten"
     >
       <input
-        name="product"
+        name="productName"
         type="text"
         placeholder="enter the product name here..."
         onChange={handleInput}
@@ -57,7 +60,7 @@ const DailySalesRecorder = () => {
         onChange={handleInput}
       ></input>
       <input
-        name="seller"
+        name="sellerName"
         type="text"
         placeholder="seller name"
         onChange={handleInput}

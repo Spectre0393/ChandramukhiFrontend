@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./updatedelete.css";
 
 import UpdateForm from "../../components/Daily Sales/UpdateForm";
-import axios from "axios";
+import { deleteSale } from "../APIS/SalesAPIS";
 
 const UpdateDeleteSales = ({ rowToModify }) => {
   const receivedRow = rowToModify.fetchedRow;
@@ -59,17 +59,15 @@ const UpdateDeleteSales = ({ rowToModify }) => {
     toggleInitiateUpdate();
   };
 
-  const deleteRow = async () => {
-    try {
-      await axios
-        .delete(`http://localhost:8081/delete-sale/${rowToModify.fetchedRow}`)
-        .then((res) => {
-          window.location.reload(false);
-        });
-    } catch (err) {
-      console.log("While deleting sales record", err);
-    }
-  };
+  function deleteRow() {
+    deleteSale(rowToModify.fetchedRow)
+      ?.then((res) => {
+        window.location.reload(false);
+      })
+      .catch((err) => {
+        console.log("While deleting sales record", err);
+      });
+  }
 
   return (
     <div className="updateDelete-buttonGroup-content">
@@ -142,7 +140,7 @@ const UpdateDeleteSales = ({ rowToModify }) => {
             </button>
             <button
               className="general-alert-button continue-button"
-                onClick={deleteRow}
+              onClick={deleteRow}
             >
               Continue
             </button>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "../../utils/css/table.css";
 import "../../utils/css/daily.css";
 
 import UpdateDeleteSales from "../../utils/UpdateDeleteButton/UpdateDeleteSales";
-import formattedStringDate from "../../utils/DateFormatter";
+import { fetchTodaySales } from "../../utils/APIS/SalesAPIS";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -47,44 +46,37 @@ const SalesTable = () => {
   };
   //states defination and functions for table pagination end
 
-  //api call to fetch all sales data start
-  useEffect(() => {
-    const allSales = async () => {
-      try {
-        const response = await axios.get("http://localhost:8081/all-sales");
-        setSalesRows(response?.data.data);
-        setLoading(true);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    allSales();
-  }, []);
-  //api call to fetch all sales data end
+  // this is not used, but if we ever need all sales data, this will do
+  /*     useEffect(() => {
+    fetchAllSales()?.then((response) => {
+      setSalesRows(response?.data);
+      setLoading(true);
+    });
+  }, []); */
 
-  //filter all sales for today's total sales start
-  const todayTotalSalesRows = salesRows?.filter((row) => {
-    if (formattedStringDate(row.sales_date) === today.toDateString()) {
-      return row;
-    } else return null;
-  });
-  //filter all sales for today's total sales end
+  //api call to fetch all today sales data start
+  useEffect(() => {
+    fetchTodaySales()?.then((response) => {
+      setSalesRows(response?.data);
+      setLoading(true);
+    });
+  }, []);
+  //api call to fetch all today sales data end
 
   // daily total counter start
   totalSales = 0;
-  todayTotalSalesRows?.map((row) => {
-    totalSales = totalSales + row.total;
+  salesRows?.map((row) => {
+    totalSales = totalSales + row.price * row.quantity;
     return totalSales;
   });
 
   totalQuantity = 0;
-  todayTotalSalesRows?.map((row) => {
+  salesRows?.map((row) => {
     totalQuantity = totalQuantity + row.quantity;
     return totalQuantity;
   });
   // daily total counter end
 
-  // states defination and functions for row selection in table start
   const [rowIdToSend, setRowIdToSend] = useState();
 
   const handleSingleRowSelection = (event, id) => {
@@ -95,15 +87,6 @@ const SalesTable = () => {
       setRowIdToSend();
     }
   };
-
-  /*   const handleSelectAllRows = (event) => {
-    if (event.target.checked) {
-      setRowIdToSend(todayTotalSalesRows?.map((row) => row.id));
-      return;
-    }
-    setRowIdToSend([]);
-  }; */
-  // states defination and functions for row selection in table end
 
   return (
     <div className="wrapper-second col-flex">
@@ -144,20 +127,20 @@ const SalesTable = () => {
           </TableHead>
           <TableBody>
             {loading &&
-              todayTotalSalesRows
+              salesRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   return (
-                    <TableRow className="pointer" key={row.id}>
+                    <TableRow className="pointer" key={row.salesID}>
                       <TableCell className="data-row-cell-formatter checkbox-row">
                         <Checkbox
                           onChange={(event) =>
-                            handleSingleRowSelection(event, row.id)
+                            handleSingleRowSelection(event, row.salesID)
                           }
                         />
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-long-wid">
-                        {row.product_name}
+                        {row.productName}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
                         {row.price}
@@ -166,10 +149,10 @@ const SalesTable = () => {
                         {row.quantity}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                        {row.total}
+                        {row.price * row.quantity}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-short-wid">
-                        {row.seller}
+                        {row.sellerName}
                       </TableCell>
                       <TableCell className="data-row-cell-formatter data-row-cell-medium-wid">
                         <UpdateDeleteSales
@@ -193,7 +176,7 @@ const SalesTable = () => {
           className="full-table-pagination"
           component="div"
           rowsPerPageOptions={[13]}
-          count={todayTotalSalesRows.length}
+          count={salesRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { recordCreditorTransactions } from "../../utils/APIS/CreditorTransactionsAPIS";
+import { fetchCreditorByName } from "../../utils/APIS/CreditorsAPIS";
 
 const DailyCreditorRecorder = () => {
   const today = new Date();
 
   const [newCreditorTransaction, setNewCreditorTransaction] = useState({
-    creditor: "",
-    amount: "",
-    transactionType: "",
-    paidBy: "",
-    date: today,
+    creditorName: "",
+    depositedAmount: "",
+    depositorName: "",
+    transactionDate: today,
   });
 
   const form = document.getElementById("creditor_entry_form");
@@ -19,9 +19,10 @@ const DailyCreditorRecorder = () => {
       ...newCreditorTransaction,
       [event.target.name]: event.target.value,
     });
+    console.log(newCreditorTransaction);
   };
 
-  //to update the daily finance transaction in finances table start
+  //to update the daily creditor transaction in creditor table start
 
   const [creditorIsThere, setCreditorIsThere] = useState(false);
 
@@ -32,58 +33,24 @@ const DailyCreditorRecorder = () => {
   async function submitCreditorTransactionData(event) {
     event.preventDefault();
     let fetchedRow;
-    const selectedCreditor = newCreditorTransaction.creditor;
+    const selectedCreditor = newCreditorTransaction.creditorName;
+    console.log("creditor name", selectedCreditor);
 
-    await axios
-      .get(`http://localhost:8081/selected-creditor/${selectedCreditor}`)
-      .then((res) => {
-        fetchedRow = res;
-      })
-      .catch((err) => {
-        console.log(err);   
-      });
-
-    if (fetchedRow?.data?.data[0]?.creditors_name === undefined) {
-
-      let creditorDoesntExist = !creditorIsThere;
-      setCreditorIsThere(creditorDoesntExist);
+    fetchCreditorByName(selectedCreditor)?.then((response) => {
+      fetchedRow = response?.data;
+      console.log("fetchedRow:", fetchedRow);
+      if (fetchedRow?.creditorName === undefined) {
+        let creditorDoesntExist = !creditorIsThere;
+        console.log("creditor status:", creditorDoesntExist);
+        setCreditorIsThere(creditorDoesntExist);
+        form.reset();
+      } else if (fetchedRow?.creditorName !== "") {
+        console.log("to save transaction:", newCreditorTransaction);
+        recordCreditorTransactions(newCreditorTransaction);
+      }
       form.reset();
-    } else if (fetchedRow?.data?.data[0]?.creditors_name !== "") { 
-      const creditorName = fetchedRow?.data?.data[0]?.creditors_name;
-      const paidAmount =
-        parseInt(fetchedRow?.data?.data[0]?.debit_amount) +
-        parseInt(newCreditorTransaction.amount);
-
-      const toUpdateValues = {
-        toUpdateAmount: paidAmount,
-        toUpdateCreditor: creditorName,
-      };
-      //record transaction in transaction table if creditor exist in creditors table
-      await axios
-        .post(
-          "http://localhost:8081/record-creditorTransaction",
-          newCreditorTransaction
-        )
-        .then((res) => {
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      form.reset();
-      //update balance in creditors table as per transaction
-
-      await axios
-        .patch(
-          `http://localhost:8081/update-creditors-balance/${creditorName}`,
-          toUpdateValues
-        )
-        .then((res) => {
-          window.location.reload(false);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+      window.location.reload(false);
+    });
   }
 
   return (
@@ -95,34 +62,22 @@ const DailyCreditorRecorder = () => {
       >
         <input
           type="text"
-          name="creditor"
+          name="creditorName"
           placeholder="creditor's  name..."
           className="not-selectable"
           onChange={handleInput}
         ></input>
         <input
           type="text"
-          name="amount"
+          name="depositedAmount"
           placeholder="amount..."
           className="not-selectable"
           onChange={handleInput}
         ></input>
 
-        <select
-          name="transactionType"
-          className="dropdown-option not-selectable"
-          required
-          onChange={handleInput}
-        >
-          <option value="" hidden>
-            Select your option
-          </option>
-          <option value="Loan Payment">Loan Payment</option>
-        </select>
-
         <input
           type="text"
-          name="paidBy"
+          name="depositorName"
           placeholder="depositor's  name..."
           className="not-selectable"
           onChange={handleInput}
